@@ -1,24 +1,54 @@
-use quicksilver::{run, Graphics, Input, Result, Settings, Window};
-use quicksilver::geom::Vector;
+use quicksilver::prelude::*;
 
-fn main() {
-    run(
-        Settings {
-            title: "Roguelike game in Rust",
-            size: Vector::new(800.0, 600.0),
-            ..Settings::default()
-        },
-        app,
-    );
+struct Game {
+    title: Asset<Image>,
+    mononoki_font_info: Asset<Image>
 }
 
-async fn app(_window: Window, _gfx: Graphics, mut input: Input) -> Result<()> {
-    loop {
-        while let Some(_) = input.next_event().await {
-            // Normally we'd do some processing here
-        }
-        // And then we'd do updates and drawing here
-        // When this loop ends, the window will close and the application will stop
-        // If the window is closed, our application will receive a close event and terminate also
+impl State for Game {
+    fn new() -> Result<Self> {
+        let font_mononoki = "mononoki-Regular.ttf";
+
+        let title = Asset::new(
+            Font::load(font_mononoki)
+                .and_then(|font| {
+                    font.render("Roguelike game in Rust", &FontStyle::new(72.0, Color::BLACK))
+                })
+        );
+
+        let mononoki_font_info = Asset::new(
+            Font::load(font_mononoki)
+                .and_then(|font| {
+                    font.render(
+                        "Mononoki font by Matthias Tellen, terms: SIL Open Font License 1.1",
+                        &FontStyle::new(20.0, Color::BLACK),
+                    )
+                })
+        );
+
+        Ok(
+            Self {
+                title,
+                mononoki_font_info
+            }
+        )
     }
+
+    fn update(&mut self, window: &mut Window) -> Result<()> {
+        Ok(())
+    }
+
+    fn draw(&mut self, window: &mut Window) -> Result<()> {
+        Ok(())
+    }
+}
+
+fn main() {
+    run::<Game>(
+        "Roguelike game in Rust",
+        Vector::new(800, 600),
+        Settings {
+            ..Default::default()
+        }
+    );
 }
