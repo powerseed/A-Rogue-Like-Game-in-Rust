@@ -1,4 +1,7 @@
+mod tile;
+
 use quicksilver::prelude::*;
+use tile::Tile;
 
 struct Game {
     title: Asset<Image>,
@@ -74,7 +77,30 @@ fn main() {
         "Roguelike game in Rust",
         Vector::new(800, 600),
         Settings {
+            scale: quicksilver::graphics::ImageScaleStrategy::Blur,
             ..Default::default()
         }
     );
+}
+
+fn generate_map(width: i32, length: i32) -> Vec<Tile> {
+    let mut map = Vec::with_capacity((width * length) as usize);
+
+    for x in 0..width {
+        for y in 0..length {
+            let mut tile = Tile {
+                position: Vector::new(x, y),
+                glyph: '.',
+                color: Color::BLACK
+            };
+
+            if x == 0 || x == width - 1 || y == 0 || x == length - 1 {
+                tile.glyph = '#';
+            }
+
+            map.push(tile);
+        }
+    }
+
+    return map;
 }
