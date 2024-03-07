@@ -1,11 +1,17 @@
 mod tile;
+mod entity;
 
 use quicksilver::prelude::*;
 use tile::Tile;
+use crate::entity::Entity;
 
 struct Game {
     title: Asset<Image>,
-    mononoki_font_info: Asset<Image>
+    mononoki_font_info: Asset<Image>,
+    map_size: (usize, usize),
+    map: Vec<Tile>,
+    entities: Vec<Entity>,
+    player_index: usize
 }
 
 impl State for Game {
@@ -29,10 +35,29 @@ impl State for Game {
                 })
         );
 
+        let map_size = (20, 15);
+        let map = generate_map(&map_size);
+        let mut entities = generate_entities();
+
+        let player_entity = Entity {
+            position: (5, 3),
+            glyph: '@',
+            color: Color::BLUE,
+            hp: 3,
+            max_hp: 5
+        };
+
+        let player_index = entities.len();
+        entities.push(player_entity);
+
         Ok(
             Self {
                 title,
-                mononoki_font_info
+                mononoki_font_info,
+                map_size,
+                map,
+                entities,
+                player_index
             }
         )
     }
@@ -83,13 +108,16 @@ fn main() {
     );
 }
 
-fn generate_map(width: i32, length: i32) -> Vec<Tile> {
-    let mut map = Vec::with_capacity((width * length) as usize);
+fn generate_map(map_size: &(usize, usize)) -> Vec<Tile> {
+    let width = map_size.0;
+    let length = map_size.1;
 
-    for x in 0..width {
-        for y in 0..length {
+    let mut map = Vec::with_capacity(width * length);
+
+    for x in 0..map_size.0 {
+        for y in 0..map_size.1 {
             let mut tile = Tile {
-                position: Vector::new(x, y),
+                position: (x, y),
                 glyph: '.',
                 color: Color::BLACK
             };
@@ -103,4 +131,37 @@ fn generate_map(width: i32, length: i32) -> Vec<Tile> {
     }
 
     return map;
+}
+
+fn generate_entities() -> Vec<Entity> {
+    vec![
+        Entity {
+            position: (9, 6),
+            glyph: 'g',
+            color: Color::RED,
+            hp: 1,
+            max_hp: 1,
+        },
+        Entity {
+            position: (2, 4),
+            glyph: 'g',
+            color: Color::RED,
+            hp: 1,
+            max_hp: 1,
+        },
+        Entity {
+            position: (7, 5),
+            glyph: '%',
+            color: Color::PURPLE,
+            hp: 0,
+            max_hp: 0,
+        },
+        Entity {
+            position: (4, 8),
+            glyph: '%',
+            color: Color::PURPLE,
+            hp: 0,
+            max_hp: 0,
+        }
+    ]
 }
