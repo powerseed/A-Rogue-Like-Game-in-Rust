@@ -1,6 +1,7 @@
 mod tile;
 mod entity;
 
+use std::collections::HashMap;
 use quicksilver::prelude::*;
 use tile::Tile;
 use crate::entity::Entity;
@@ -11,7 +12,9 @@ struct Game {
     map_size: (usize, usize),
     map: Vec<Tile>,
     entities: Vec<Entity>,
-    player_index: usize
+    player_index: usize,
+    tile_size_in_px: (usize, usize),
+    tile_set: Asset<HashMap<char, Image>>
 }
 
 impl State for Game {
@@ -50,6 +53,30 @@ impl State for Game {
         let player_index = entities.len();
         entities.push(player_entity);
 
+        let game_glyphs = "#@g.%";
+        let tile_size_in_px = (12, 24);
+        let tile_set = Asset::new(
+            Font::load(font_mononoki)
+                .and_then(move |font| {
+                        let tiles = font
+                            .render(game_glyphs, &FontStyle::new(tile_size_in_px.1 as f32, Color::WHITE))
+                            .expect("Could not render the font tileset.");
+
+                        let mut tileset = HashMap::new();
+
+                        for (index, glyph) in game_glyphs.chars().enumerate() {
+                            let position = (index as i32 * tile_size_in_px.0 as i32, 0);
+                            let tile = tiles.subimage(
+                                Rectangle::new(position, Vector::new(tile_size_in_px.0 as f32, tile_size_in_px.1 as f32))
+                            );
+                            tileset.insert(glyph, tile);
+                        }
+
+                        Ok(tileset)
+                    }
+                )
+        );
+
         Ok(
             Self {
                 title,
@@ -57,7 +84,9 @@ impl State for Game {
                 map_size,
                 map,
                 entities,
-                player_index
+                player_index,
+                tile_size_in_px,
+                tile_set
             }
         )
     }
