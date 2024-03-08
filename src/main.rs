@@ -9,6 +9,7 @@ use crate::entity::Entity;
 struct Game {
     title: Asset<Image>,
     mononoki_font_info: Asset<Image>,
+    square_font_info: Asset<Image>,
     map_size: (usize, usize),
     map: Vec<Tile>,
     entities: Vec<Entity>,
@@ -20,6 +21,7 @@ struct Game {
 impl State for Game {
     fn new() -> Result<Self> {
         let font_mononoki = "mononoki-Regular.ttf";
+        let font_square = "square.ttf";
 
         let title = Asset::new(
             Font::load(font_mononoki)
@@ -33,6 +35,16 @@ impl State for Game {
                 .and_then(|font| {
                     font.render(
                         "Mononoki font by Matthias Tellen, terms: SIL Open Font License 1.1",
+                        &FontStyle::new(20.0, Color::BLACK),
+                    )
+                })
+        );
+
+        let square_font_info = Asset::new(
+            Font::load(font_mononoki)
+                .and_then(|font| {
+                    font.render(
+                        "Square font by Wouter Van Oortmerssen, terms: CC BY 3.0",
                         &FontStyle::new(20.0, Color::BLACK),
                     )
                 })
@@ -54,9 +66,9 @@ impl State for Game {
         entities.push(player_entity);
 
         let game_glyphs = "#@g.%";
-        let tile_size_in_px = (12, 24);
+        let tile_size_in_px = (24, 24);
         let tile_set = Asset::new(
-            Font::load(font_mononoki)
+            Font::load(font_square)
                 .and_then(move |font| {
                         let tiles = font
                             .render(game_glyphs, &FontStyle::new(tile_size_in_px.1 as f32, Color::WHITE))
@@ -81,6 +93,7 @@ impl State for Game {
             Self {
                 title,
                 mononoki_font_info,
+                square_font_info,
                 map_size,
                 map,
                 entities,
@@ -122,10 +135,24 @@ impl State for Game {
             Ok(())
         })?;
 
+        self.square_font_info.execute(|image| {
+            window.draw(
+                &image
+                    .area()
+                    .translate(
+                        (2, window.screen_size().y as i32 - 30)
+                    ),
+                Img(&image)
+            );
+            Ok(())
+        })?;
+
         self.tile_set.execute(|tile_set| {
             for tile in &self.map {
                 if let Some(image) = tile_set.get(&tile.glyph) {
-                    let position_px = (tile.position.0 * self.tile_size_in_px.0, tile.position.1 * self.tile_size_in_px.1);
+                    let mut position_px = (tile.position.0 * self.tile_size_in_px.0, tile.position.1 * self.tile_size_in_px.1);
+                    position_px.1 += 120;
+
                     window.draw(
                         &Rectangle::new(Vector::new(position_px.0 as f32, position_px.1 as f32), image.area().size()),
                         Blended(&image, tile.color)
