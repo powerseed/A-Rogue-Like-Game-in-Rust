@@ -122,6 +122,19 @@ impl State for Game {
             Ok(())
         })?;
 
+        self.tile_set.execute(|tile_set| {
+            for tile in &self.map {
+                if let Some(image) = tile_set.get(&tile.glyph) {
+                    let position_px = (tile.position.0 * self.tile_size_in_px.0, tile.position.1 * self.tile_size_in_px.1);
+                    window.draw(
+                        &Rectangle::new(Vector::new(position_px.0 as f32, position_px.1 as f32), image.area().size()),
+                        Blended(&image, tile.color)
+                    )
+                }
+            }
+            Ok(())
+        })?;
+
         Ok(())
     }
 }
@@ -151,7 +164,7 @@ fn generate_map(map_size: &(usize, usize)) -> Vec<Tile> {
                 color: Color::BLACK
             };
 
-            if x == 0 || x == width - 1 || y == 0 || x == length - 1 {
+            if x == 0 || x == width - 1 || y == 0 || y == length - 1 {
                 tile.glyph = '#';
             }
 
