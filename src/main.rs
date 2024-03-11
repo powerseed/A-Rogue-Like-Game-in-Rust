@@ -1,7 +1,9 @@
 mod tile;
 mod entity;
 
+use std::cmp::{max, min};
 use std::collections::HashMap;
+use quicksilver::input::ButtonState::Pressed;
 use quicksilver::prelude::*;
 use tile::Tile;
 use crate::entity::Entity;
@@ -105,6 +107,28 @@ impl State for Game {
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
+        let player = &mut self.entities[self.player_index];
+
+        if window.keyboard()[Key::Left] == Pressed {
+            player.position.0 -= 1;
+            player.position.0 = max(player.position.0, 1);
+        }
+        if window.keyboard()[Key::Right] == Pressed {
+            player.position.0 += 1;
+            player.position.0 = min(player.position.0, self.map_size.0 - 2);
+        }
+        if window.keyboard()[Key::Up] == Pressed {
+            player.position.1 -= 1;
+            player.position.1 = max(player.position.1, 1);
+        }
+        if window.keyboard()[Key::Down] == Pressed {
+            player.position.1 += 1;
+            player.position.1 = min(player.position.1, self.map_size.1 - 2);
+        }
+        if window.keyboard()[Key::Escape].is_down() {
+            window.close();
+        }
+
         Ok(())
     }
 
