@@ -162,6 +162,21 @@ impl State for Game {
             Ok(())
         })?;
 
+        self.tile_set.execute(|tile_set| {
+            for entity in &self.entities {
+                if let Some(image) = tile_set.get(&entity.glyph) {
+                    let mut position_px = (entity.position.0 * self.tile_size_in_px.0, entity.position.1 * self.tile_size_in_px.1);
+                    position_px.1 += 120;
+
+                    window.draw(
+                        &Rectangle::new(Vector::new(position_px.0 as f32, position_px.1 as f32), image.area().size()),
+                        Blended(&image, entity.color)
+                    )
+                }
+            }
+            Ok(())
+        })?;
+
         Ok(())
     }
 }
