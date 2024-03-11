@@ -147,11 +147,13 @@ impl State for Game {
             Ok(())
         })?;
 
+        let content_y_offset = 120;
+
         self.tile_set.execute(|tile_set| {
             for tile in &self.map {
                 if let Some(image) = tile_set.get(&tile.glyph) {
                     let mut position_px = (tile.position.0 * self.tile_size_in_px.0, tile.position.1 * self.tile_size_in_px.1);
-                    position_px.1 += 120;
+                    position_px.1 += content_y_offset;
 
                     window.draw(
                         &Rectangle::new(Vector::new(position_px.0 as f32, position_px.1 as f32), image.area().size()),
@@ -166,7 +168,7 @@ impl State for Game {
             for entity in &self.entities {
                 if let Some(image) = tile_set.get(&entity.glyph) {
                     let mut position_px = (entity.position.0 * self.tile_size_in_px.0, entity.position.1 * self.tile_size_in_px.1);
-                    position_px.1 += 120;
+                    position_px.1 += content_y_offset;
 
                     window.draw(
                         &Rectangle::new(Vector::new(position_px.0 as f32, position_px.1 as f32), image.area().size()),
@@ -176,6 +178,21 @@ impl State for Game {
             }
             Ok(())
         })?;
+
+        let player = &self.entities[self.player_index];
+        let full_health_width_px = 100.0;
+        let current_health_width_px = (player.hp as f32 / player.max_hp as f32) * full_health_width_px;
+        let health_bar_position_px = Vector::new((self.map_size.0 * self.tile_size_in_px.0) as f32, content_y_offset as f32);
+
+        window.draw(
+            &Rectangle::new(health_bar_position_px, (full_health_width_px, self.tile_size_in_px.1 as f32)),
+            Col(Color::RED.with_alpha(0.5))
+        );
+
+        window.draw(
+            &Rectangle::new(health_bar_position_px, (current_health_width_px, self.tile_size_in_px.1 as f32)),
+            Col(Color::RED)
+        );
 
         Ok(())
     }
